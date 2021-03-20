@@ -1,0 +1,170 @@
+<html>
+  <head>
+    <title>PySpark Tutorial</title>
+    <!-- <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/themes/prism-twilight.min.css"
+      rel="stylesheet"
+    /> -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/themes/prism-tomorrow.min.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <h1>PySpark Solutions.</h1>
+
+    Important note here!
+
+    <h2>Section 1</h2>
+    <pre><code class="language-python"># 1.1
+# We can use inferSchema to infer the schema of the CSV and load a Spark DataFrame.
+file_loc = "./data.csv"
+sdf = spark.read.format("csv") \
+        .option("header", True) \
+        .option("inferSchema", True) \
+        .load(file_loc)
+
+# One nice way to print the column + dtype output.
+print(pd.DataFrame(sdf.dtypes))
+
+# To show the dataset... 
+sdf.show()
+
+# 1.2
+# If you're importing a very large dataset, Spark will scan the 
+# entire thing once when you inferSchema.  This may take a significant
+# amount of time.  It may also not give you the type you would expect
+# from your column of data.  Explicit schemas solve both of these issues.
+from pyspark.sql.types import (
+    StructType, StructField, StringType, 
+    TimestampType, IntegerType, BooleanType, 
+    DoubleType
+)
+
+data_schema = StructType([
+    StructField('datetime_col', TimestampType(), True),
+    StructField('float_col', DoubleType(), True),
+    StructField('int_col', IntegerType(), True),
+    StructField('categorical_col', StringType(), True),
+    StructField('bool_col', BooleanType(), True),
+])
+sdf = spark.read.format("csv") \
+        .option("header", True) \
+        .schema(data_schema) \
+        .load(file_loc)
+
+# 1.3
+
+cols = ['datetime_col', 'float_col', 'categorical_col']
+sdf.select(*cols) \
+    .show(25, truncate=False)
+
+
+# 1.4.1
+# I like to separate the mask out if it gets too long.
+mask = ((col('categorical_col') == "Low") & 
+       (col('int_col') < 0))
+sdf.filter(mask).show()
+
+# But you can also chain filters.
+sdf.filter(sdf.categorical_col == "Low") \
+   .filter(sdf.int_col < 0)\
+   .show() 
+
+# 1.4.2
+# Here's one potential way to do aggregations.
+sdf.groupBy("categorical_col") \
+   .agg({"int_col": "average"}) \
+   .show()
+
+# 1.4.3
+# I like to split out the aggregations.  Note that we have given aliases to these columns.
+exprs = [
+  F.mean(col("int_col")).alias("int_col_mean"),
+  F.sum(col("int_col")).alias("int_col_sum")
+]
+
+# 1.4.4
+sdf.select("categorical_col") \
+    .groupBy("categorical_col") \
+    .count() \
+    .show()
+
+sdf.groupBy("categorical_col") \
+    .agg(*exprs) \
+    .where(col("int_col_mean") > 0) \
+    .show()
+
+</code></pre>
+
+    <h2>Section 2</h2>
+    <pre><code class="language-python"># First, we're going to import all the types for convenience.
+from pyspark.sql.types import (DoubleType, StringType, IntegerType, FloatType,
+                               StringType, BooleanType)
+# 2.1.1
+# withColumn's first argument is the column we want to overwrite or create (if it does not exist),
+# and data we're writing is the second argument; in this case, we're casting
+# a single column as DoubleType.
+sdf = sdf.withColumn("int_col", sdf["int_col"].cast(DoubleType()))
+print(pd.DataFrame(sdf.dtypes))
+
+# Convert it back to integer.
+sdf = sdf.withColumn("int_col", sdf["int_col"].cast(IntegerType()))
+
+# 2.2.1
+# Create list of names.
+names = ["Albert", "Beth", "Carrie", "Doug", "Elie"]
+
+# PySpark requires either a list of tuples or a list of rows in order to
+# make a dataframe; this next line makes the names variable into
+# something that looks like: [("Albert", ), ("Beth", ), ...]
+# Recall that a one-element tuple in Python is denoted by (elt, ).
+names = map(lambda x: (x, ), names)
+
+# Pass the list of tuples in, the second arg is for column names.
+sdf_names = spark.createDataFrame(names, ["names"])
+sdf_names.show()
+
+# 2.2.2
+names = [("Albert", "Sampson"), ("Beth", "Schwartz"), ("Carrie", "Masters"),
+         ("Doug", "Elliot"), ("Elie", "Forest")]
+
+sdf_names = spark.createDataFrame(names, ["first_name", "last_name"])
+sdf_names.show()
+
+# 2.2.3
+
+def make_initials(first, last):
+    return first[0] + last[0]
+
+# We could also have passed in a lambda to udf() for simple functions.
+make_initials_udf = F.udf(make_initials, StringType())
+initials_col = make_initials_udf(sdf_names["first_name"], sdf_names["last_name"])
+
+# Make new column.
+sdf_names_w_initials = sdf_names.withColumn("initials", initials_col)
+sdf_names_w_initials.show()
+
+# 2.2.4
+
+# One way of doing this without any Spark builtins is:
+lowercase_initials_udf = F.udf(lambda x: x.lower(), StringType())
+lowercase_initials_col = lowercase_initials_udf(sdf_names_w_initials["initials"])
+sdf_names_w_initials = sdf_names_w_initials.withColumn("initials", lowercase_initials_col)
+sdf_names_w_initials.show()
+</code></pre>
+
+    <h2>Section 3</h2>
+    <pre><code class="language-python">
+# 3.1
+
+  
+# 3.2
+
+</code></pre>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  </body>
+</html>

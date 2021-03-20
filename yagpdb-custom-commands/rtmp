@@ -1,0 +1,28 @@
+{{/*
+  This command allows you to create the RTMP list for Sneakbike.
+  
+  Usage: `-rtmp "ip-addr" "space-sep keys"`.
+*/}}
+
+{{ $args := parseArgs 1 "Syntax is: -rtmp <the_ip_addr> <list of name-keys sep by spaces>"
+    (carg "string" "The IP Address")
+    (carg "string" "Space-separated keys for runners")
+}}
+
+{{ $ipValue := ($args.Get 0) }}
+{{ $keysParsed := (cslice).AppendSlice (split ($args.Get 1) " ") }}
+
+{{ $msg := (joinStr "" "**Server: **  `rtmp://" $ipValue ":1935/live`\n") }}
+
+{{ $msgKeys := "**Keys**:" }}
+{{- range $k, $v := $keysParsed -}}
+	{{ $msgKeys = (joinStr "\n" $msgKeys (joinStr "" "`" $v "`")) }}
+{{- end -}}
+
+{{ $msg = (joinStr "\n" $msg $msgKeys) }}
+{{ $embed := cembed 
+	"title" "Runner RTMP Server Info"
+	"description" $msg
+	"color" 0x690690
+}}
+{{ sendMessage nil $embed }}

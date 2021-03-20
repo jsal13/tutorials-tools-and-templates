@@ -1,0 +1,40 @@
+{{/*
+  This command allows you to add current-racer and current-commentator roles to a list of individuals (via their IDs).
+  
+  Usage: `-set-current-roles "<UserIDs of Comms separated by spaces>" "<UserIDs of Racers separated by spaces>"`.
+*/}}
+
+{{ $args := parseArgs 2 "Syntax is <UserIDs of Comms separated by spaces> <UserIDs of Racers separated by spaces>"
+    (carg "string" "UserIDs of Comms separated by spaces.")
+    (carg "string" "UserIDs of Racers separated by spaces")
+}}
+
+{{ $comms:= (split ($args.Get 0) " ")  }}
+{{ $racers:= (split ($args.Get 1) " ") }}
+{{ $msg := cslice }}
+
+{{/* Current Commentators. */}}
+{{- $msg = $msg.Append "Gave `current-commentator` role to: " -}} 
+{{- range $index, $element := $comms -}}
+  {{- if $element -}}
+  {{- giveRoleID (getMember $element).User.ID 810974263346462750 -}}
+    {{ $msg = $msg.Append (getMember $element).User.String  }}
+  {{- end -}}
+{{- end -}}
+
+
+{{/* Current Racers. */}}
+{{- $msg = $msg.Append "\nGave `current-racer` role to: " -}} 
+{{- range $index, $element := $racers -}}
+  {{- if $element -}}
+  {{- giveRoleID (getMember $element).User.ID 755115789891403787 -}}
+    {{ $msg = $msg.Append (getMember $element).User.String  }}
+  {{- end -}}
+{{- end -}}
+
+{{ $embed := cembed 
+	"title" "**Sneakbike Racer / Comm Roles Applied**"
+         "description"  (joinStr " " $msg.StringSlice) 
+	 "color" 0x690069
+}}
+{{ sendMessage nil $embed }}

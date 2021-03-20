@@ -1,0 +1,74 @@
+{{/* This is a volunteer-request command but can be used for a framework where 
+one can have multiple flags to create flag-related reactions.
+Default here: commentators, runners.*/}}
+
+{{ $args := parseArgs 2 `Syntax is:
+-volunteer-request "2021-01-01" "Beginner|Intermediate" [-producers] [-runners] [-comms] [-gamepickers]
+Note that everything after the date is optional and will default to: -comms -runners.`
+    (carg "string" "The date for the call to action.")
+    (carg "string" "The level of the runners.")
+}}
+{{ $argsParsed := (cslice).AppendSlice (split ($args.Get 0) " ") }}
+{{ $argsParsed = $argsParsed.AppendSlice (split ($args.Get 1) " ") }}
+
+{{ $dateStr := (index $argsParsed 0) }}
+{{ $runnerLevel := (index $argsParsed 1) }}
+
+{{ $flags := "" }}
+{{ if gt (len $argsParsed) 2 }}
+  {{ $flags = (slice $argsParsed 2) }}
+{{ else }}
+  {{ $flags = (cslice "-runners" "-commentators") }}
+{{ end }}
+
+{{ $title := (joinStr " :: " $dateStr $runnerLevel "Call for Participants") }}
+{{ $emoji := "" }}
+{{ $msg := `If you are interested in any of the following roles for the date above, react with the corresponding emoji.  
+
+_Note: this is just to gauge interest & availability. This is not a firm commitment. We'll follow up with you via DM to confirm & post to_ #📆-schedule
+
+` }}
+
+{{- range $k, $v := $flags -}}
+  {{ if eq . "-comms" }} 
+    {{ $emoji = (joinStr " " $emoji ":loudspeaker:") }}
+    {{ $msg = (joinStr "" $msg `
+:loudspeaker: : commentator`) }}
+
+  {{ else if eq . "-commentators" }} 
+    {{ $emoji = (joinStr " " $emoji ":loudspeaker:") }}
+    {{ $msg = (joinStr "" $msg `
+:loudspeaker: : commentator`) }}
+
+  {{ else if eq . "-racers" }} 
+    {{ $emoji = (joinStr " " $emoji ":athletic_shoe:") }}
+    {{ $msg = (joinStr "" $msg `
+:athletic_shoe: : runner`) }}
+
+{{ else if eq . "-runners" }} 
+    {{ $emoji = (joinStr " " $emoji ":athletic_shoe:") }}
+    {{ $msg = (joinStr "" $msg `
+:athletic_shoe: : runner`) }}
+
+  {{ else if eq . "-producers" }} 
+    {{ $emoji = (joinStr " " $emoji ":clapper:") }}
+    {{ $msg = (joinStr "" $msg `
+:clapper: : producer`) }}
+
+  {{ else if eq . "-gamepickers" }} 
+    {{ $emoji = (joinStr " " $emoji ":video_game:") }}
+    {{ $msg = (joinStr "" $msg `
+:video_game: : gamepicker`) }}
+
+  {{ end }}
+{{- end -}}
+
+{{ $embed := cembed 
+	"title" $title
+	"description" $msg
+	"color" 0xff69b4
+}}
+
+{{ $msgID := sendMessageRetID nil $embed }}
+{{ addMessageReactions nil ($msgID) (split $emoji " ") }}
+{{ deleteTrigger 1 }}

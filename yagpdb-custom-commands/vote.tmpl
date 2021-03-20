@@ -1,0 +1,33 @@
+{{/*
+  This command allows you to create a voting message with YAG, including Vote Title (header), Vote Content (body),
+  and Vote Status (footer).
+  
+  Usage: `-vote "Example Title" "Example Body for vote..."`.
+*/}}
+
+{{ $args := parseArgs 1 "Syntax is <messageID> <result>"
+    (carg "int" "Message ID for the thing you want to edit.")
+    (carg "string" "Result of the vote.")
+}}
+
+{{ $msg := getMessage nil ($args.Get 0) }}
+{{ $embeds := structToSdict (index $msg.Embeds 0) }}
+
+{{ $newColor := ""}}
+{{ if eq ($args.Get 1) "Accepted" }}
+	{{ $newColor = 0x33cc33 }}
+{{ else if eq ($args.Get 1) "Rejected" }} 
+	{{ $newColor = 0xff5050 }}
+{{ else }} 
+ 	{{ $newColor = 0xffffff }}
+{{ end }}
+
+{{ $embedPayload := cembed
+	"title" ($embeds.Get "Title")
+	"description" ($embeds.Get "Description")
+	"footer" (sdict "text" (joinStr "" "Vote Outcome: " ($args.Get 1)))
+	"color"  ($newColor)
+}}
+
+{{ editMessage nil ($args.Get 0) (complexMessageEdit "content" "" "embed" ( $embedPayload )) }}
+{{ deleteTrigger 1 }}

@@ -1,0 +1,9 @@
+__pycache__
+.pytest_cache
+.vscode
+*.db
+logs
+unittests.cfg
+airflow.cfg
+airflow-webserver.pid
+.mypy_cache

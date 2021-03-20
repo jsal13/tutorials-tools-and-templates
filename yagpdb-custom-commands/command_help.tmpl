@@ -1,0 +1,37 @@
+{{- $msgVoting := (cslice  
+"**Voting**"
+"----------"
+	"To create a vote."
+	"`-vote \"Example Title\" \"Body of the vote goes here.\"`"
+	""
+	"To set a vote's results. Right-click the relevant vote to copy the Message ID.  Use \"Accepted\" or \"Rejected\" as the RESULT."
+	"`-vote-result <message_id> \"RESULT\"`"
+	""
+"**Requests**"
+"----------"
+	"To request SB volunteers in the announcement channel.  Note the date should be in \"YYYY-MM-DD\" format.  The LEVEL should be either \"Beginner\" or \"Intermediate\".  Each of the items starting with a \"-\" after LEVEL are optional, only use the ones which are needed."
+	"`-volunteer-request \"2021-01-01\" \"LEVEL\" -producers -runners -comms -gamepickers`"
+	""
+"**Utils**"
+"----------"
+	"Make Helmabot (YAGPDB) create a message.  The color can be whatever hex value you want."
+	"`-se -color \"#123456\" -title \"A cool title\" -desc \"Body of the message.\"`"
+	""
+	"To edit existing messages in Helmabot (YAGPDB).  The <new-content> will include everything after the _-se_ command above."
+	"`-edit <message_id> <new-content>`"
+	""
+	"To create the RTMP+Keys message.  The keys should be space separated like \"alice bob cindy doug\".  The IP address should not include the port, just the numbers and dots like _23.21.2.45_."
+	"`-rtmp <the_ip_addr> <list of name-keys sep by spaces>`"
+	""
+
+).StringSlice -}}
+
+{{ $msg :=  (joinStr "\n" $msgVoting) }}
+
+{{ $embed := cembed 
+	"title" "**Sneakbike Commands**"
+	"description" $msg
+	 "color" 0x690069
+}}
+
+{{ sendMessage nil $embed }}
