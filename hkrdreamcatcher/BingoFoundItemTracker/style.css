@@ -1,0 +1,77 @@
+body {
+  background-color: transparent;
+}
+
+.area-pill {
+  /* Div encloses an entire pill. */
+  display: flex;
+  margin-top: -6px;
+}
+
+.area-pill-inner {
+  /* Inside + Background of a pill area. */
+  position: relative;
+  display: flex;
+  border-radius: 4rem;
+  padding-right: 10px;
+  height: 62px;
+  top: 6px;
+  left: 70px;
+}
+
+.area-pill-rounded-edge {
+  /* Rounded edge of a pill. */
+  position: relative;
+  display: flex;
+  border-top-left-radius: 4rem;
+  border-bottom-left-radius: 4rem;
+  width: 68px;
+  height: 62px;
+  top: -6px;
+  left: -6px;
+  padding: 0;
+  margin: 0;
+}
+
+.area-pill-area-title-div {
+  /* Div holding the area title on the pill. */
+  position: relative;
+  display: flex;
+  left: 15px;
+  top: 16px;
+}
+
+.area-pill-area-title-text {
+  /* The pill area text. */
+  font-family: "Roboto", sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: white;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+  cursor: default;
+}
+
+.pill-items-container {
+  /* Contains each of the items in an area row. */
+  display: flex;
+  position: relative;
+  top: 6px;
+}
+
+.item-image {
+  /* Image used to represent an item in the table.  */
+  width: 0;
+  height: 36px;
+  margin-right: 2px;
+  opacity: 0;
+}
+
+.item-found {
+  /* Used to turn opactiy down on an image. */
+  opacity: 1;
+    width: 36px;
+
+}
